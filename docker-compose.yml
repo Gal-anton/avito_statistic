@@ -1,0 +1,19 @@
+version: '3'
+services:
+  php-apache:
+    build:
+      context: ./images/php-apache
+    ports:
+      - 80:80
+    volumes:
+      - ./html:/var/www/html
+    links:
+      - 'mariadb'
+  mariadb:
+    build:
+      context: images/mariadb
+    command: --default-authentication-plugin=mysql_native_password
+    ports:
+      - 3306:3306
+    volumes:
+      - ./mariadb_data:/var/lib/mysql

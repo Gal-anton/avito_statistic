@@ -1,0 +1,8 @@
+FROM mariadb:10.5
+
+ENV MYSQL_ROOT_PASSWORD 123
+ENV MYSQL_USER test
+ENV MYSQL_PASSWORD 123
+ENV MYSQL_DATABASE avito_test
+
+COPY ./sql /docker-entrypoint-initdb.d/
