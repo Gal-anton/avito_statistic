@@ -3,6 +3,9 @@ namespace Src\TableGateways;
 
 class StatisticGateway {
 
+    /**
+     * @var ?\PDO
+     */
     private $db = null;
 
     public function __construct($db)
@@ -54,7 +57,7 @@ class StatisticGateway {
                 'clicks' => $input['clicks'] ?? null,
                 'cost' => round($input['cost'], 2) ?? null,
             ));
-            return $statement->rowCount();
+            return $this->db->lastInsertId();
         } catch (\PDOException $e) {
             exit($e->getMessage());
         }
@@ -63,7 +66,9 @@ class StatisticGateway {
     public function delete()
     {
         $statement = "
-            TRUNCATE TABLE Statistic
+            DELETE
+            FROM Statistic
+            WHERE true
         ";
 
         try {

@@ -47,22 +47,21 @@ class StatisticController
      */
     private function getStatistics()
     {
-        $input = (array) json_decode(file_get_contents('php://input'), true);
+        $input = (array)json_decode(file_get_contents('php://input'), true);
 
-        $order = $input["order"] ?? "date";
-        $validOrders = ["date", "views", "clicks", "cost", "cpc", "cpm"];
+        $order = $input["order"] ?? null;
+
         if (!array_key_exists("from", $input) ||
             !array_key_exists("to", $input) ||
             !$this->validateDate($input["from"]) ||
             !$this->validateDate($input["to"]) ||
-            !in_array($order, $validOrders))
-        {
+            !$this->validateOrder($order)) {
             return $this->unprocessableEntityResponse();
         }
         $result                         = $this->statisticGateway->findAll(
-                                                                            $input["from"],
-                                                                            $input["to"],
-                                                                            $order);
+            $input["from"],
+            $input["to"],
+            $order);
         $response['status_code_header'] = 'HTTP/1.1 200 OK';
         $response['body']               = json_encode($result);
 
@@ -71,14 +70,14 @@ class StatisticController
 
     private function createStatisticsFromRequest()
     {
-        $input = (array) json_decode(file_get_contents('php://input'), true);
+        $input = (array)json_decode(file_get_contents('php://input'), true);
         if (!$this->validateStatistic($input)) {
             return $this->unprocessableEntityResponse();
         }
 
-        $this->statisticGateway->insert($input);
+        $id                             = $this->statisticGateway->insert($input);
         $response['status_code_header'] = 'HTTP/1.1 201 Created';
-        $response['body']               = null;
+        $response['body']               = json_encode(["id" => $id]);
 
         return $response;
     }
@@ -86,10 +85,10 @@ class StatisticController
 
     private function deleteStatistics()
     {
-        $this->statisticGateway->delete();
+        $rowCount = $this->statisticGateway->delete();
 
         $response['status_code_header'] = 'HTTP/1.1 200 OK';
-        $response['body']               = null;
+        $response['body']               = json_encode(["count" => $rowCount]);
 
         return $response;
     }
@@ -109,21 +108,25 @@ class StatisticController
             return false;
         }
 
-        if (isset($input['cost']) && !is_float($input['cost'])) {
+        if (isset($input['cost']) && !is_numeric($input['cost'])) {
             return false;
         }
 
         return true;
     }
 
-    private function validateDate($date) {
+    private function validateOrder(?string $order) {
+        $validOrders = ["date", "views", "clicks", "cost", "cpc", "cpm"];
+
+        return is_null($order) || in_array($order, $validOrders);
+    }
+
+    private function validateDate($date)
+    {
         $dataValidate = explode('-', $date);
-        if (count($dataValidate) !== 3 ||
-            !checkdate($dataValidate[1], $dataValidate[2], $dataValidate[0]))
-        {
-            return false;
-        }
-        return true;
+
+        return count($dataValidate) === 3 &&
+            checkdate($dataValidate[1], $dataValidate[2], $dataValidate[0]);
     }
 
     private function unprocessableEntityResponse()
