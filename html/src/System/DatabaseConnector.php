@@ -29,7 +29,7 @@ class DatabaseConnector
 
     /**
      * Get instance of DB connection
-     * @return \PDO
+     * @return \PDO Database connection
      */
     public function getConnection(): \PDO
     {

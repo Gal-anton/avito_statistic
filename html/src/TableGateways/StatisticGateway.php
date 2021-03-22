@@ -4,15 +4,28 @@ namespace Src\TableGateways;
 class StatisticGateway {
 
     /**
+     * Database connection
      * @var ?\PDO
      */
     private $db = null;
 
+    /**
+     * StatisticGateway constructor
+     * @param $db
+     */
     public function __construct($db)
     {
         $this->db = $db;
     }
 
+    /**
+     * Get statistic grouped by date within the client date period
+     *
+     * @param string $fromDate Date the statistic needed from
+     * @param string $toDate   Date the statistic needed until
+     * @param string $order    The order the statistic is presented
+     * @return array           The statistic
+     */
     public function findAll($fromDate, $toDate, $order = "date")
     {
         $statement = "
@@ -40,6 +53,12 @@ class StatisticGateway {
         }
     }
 
+    /**
+     * Save statistic to database
+     *
+     * @param array $input The statistic to save
+     * @return string      ID the last inserted row
+     */
     public function insert(Array $input)
     {
         $statement = "
@@ -63,6 +82,11 @@ class StatisticGateway {
         }
     }
 
+    /**
+     * Delete all saved statistic
+     *
+     * @return int Count of deleted items
+     */
     public function delete()
     {
         $statement = "

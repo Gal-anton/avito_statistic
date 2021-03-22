@@ -6,12 +6,27 @@ use Src\TableGateways\StatisticGateway;
 
 class StatisticController
 {
+    /**
+     * @var \PDO Database connection
+     */
+    private \PDO $db;
 
-    private $db;
+    /**
+     * @var string The client's request
+     */
     private $requestMethod;
 
+    /**
+     * @var StatisticGateway Class to work with Database
+     */
     private StatisticGateway $statisticGateway;
 
+    /**
+     * StatisticController constructor.
+     *
+     * @param \PDO   $db             Database connection
+     * @param string $requestMethod  Client's request
+     */
     public function __construct($db, $requestMethod)
     {
         $this->db            = $db;
@@ -20,6 +35,9 @@ class StatisticController
         $this->statisticGateway = new StatisticGateway($db);
     }
 
+    /**
+     * Definition of the action in order to client's request type
+     */
     public function processRequest()
     {
         switch ($this->requestMethod) {
@@ -43,7 +61,10 @@ class StatisticController
     }
 
     /**
-     * @return array
+     * Method GET. Get all statistic from start date to end date that
+     * initialized ny client
+     *
+     * @return array Status code and statistic aggregated by date
      */
     private function getStatistics()
     {
@@ -68,6 +89,11 @@ class StatisticController
         return $response;
     }
 
+    /**
+     * Method POST. Save statistic into database
+     *
+     * @return array Status code with ID of inserted row
+     */
     private function createStatisticsFromRequest()
     {
         $input = (array)json_decode(file_get_contents('php://input'), true);
@@ -82,7 +108,11 @@ class StatisticController
         return $response;
     }
 
-
+    /**
+     * Delet all saved statistic
+     *
+     * @return array Status code and count of deleted items
+     */
     private function deleteStatistics()
     {
         $rowCount = $this->statisticGateway->delete();
@@ -93,6 +123,12 @@ class StatisticController
         return $response;
     }
 
+    /**
+     * Method to validate client data about statistic item
+     *
+     * @param array $input Statistic data to validate
+     * @return bool        The result of validation
+     */
     private function validateStatistic($input)
     {
 
@@ -115,13 +151,24 @@ class StatisticController
         return true;
     }
 
+    /**
+     * Validate order type
+     *
+     * @param string|null $order Column to order by to validate
+     * @return bool The validation result
+     */
     private function validateOrder(?string $order) {
         $validOrders = ["date", "views", "clicks", "cost", "cpc", "cpm"];
 
         return is_null($order) || in_array($order, $validOrders);
     }
 
-    private function validateDate($date)
+    /**
+     * Data must be formatted "YYYY-MM-DD"
+     * @param string $date Date to validate
+     * @return bool The validation result
+     */
+    private function validateDate(string $date)
     {
         $dataValidate = explode('-', $date);
 
@@ -129,6 +176,11 @@ class StatisticController
             checkdate($dataValidate[1], $dataValidate[2], $dataValidate[0]);
     }
 
+    /**
+     * Invalid data message to client
+     *
+     * @return array Status code and error message
+     */
     private function unprocessableEntityResponse()
     {
         $response['status_code_header'] = 'HTTP/1.1 422 Unprocessable Entity';
@@ -139,6 +191,11 @@ class StatisticController
         return $response;
     }
 
+    /**
+     * Send error message if the method does not exist
+     *
+     * @return array Status code (error)
+     */
     private function notFoundResponse()
     {
         $response['status_code_header'] = 'HTTP/1.1 404 Not Found';
