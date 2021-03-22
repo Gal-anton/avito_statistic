@@ -7,7 +7,7 @@ class StatisticGateway {
      * Database connection
      * @var ?\PDO
      */
-    private $db = null;
+    private $db;
 
     /**
      * StatisticGateway constructor

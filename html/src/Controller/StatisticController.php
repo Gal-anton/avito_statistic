@@ -2,19 +2,15 @@
 
 namespace Src\Controller;
 
+use Src\System\DatabaseConnector;
 use Src\TableGateways\StatisticGateway;
 
 class StatisticController
 {
     /**
-     * @var \PDO Database connection
-     */
-    private \PDO $db;
-
-    /**
      * @var string The client's request
      */
-    private $requestMethod;
+    private string $requestMethod;
 
     /**
      * @var StatisticGateway Class to work with Database
@@ -24,15 +20,13 @@ class StatisticController
     /**
      * StatisticController constructor.
      *
-     * @param \PDO   $db             Database connection
-     * @param string $requestMethod  Client's request
+     * @param string $requestMethod Client's request
      */
-    public function __construct($db, $requestMethod)
+    public function __construct(string $requestMethod)
     {
-        $this->db            = $db;
         $this->requestMethod = $requestMethod;
 
-        $this->statisticGateway = new StatisticGateway($db);
+        $this->statisticGateway = new StatisticGateway(DatabaseConnector::getConnection());
     }
 
     /**

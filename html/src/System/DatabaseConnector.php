@@ -5,46 +5,34 @@ namespace Src\System;
 class DatabaseConnector
 {
 
-    private ?\PDO $dbConnection = null;
-
-    private string $connection;
-    private string $host;
-    private string $port;
-    private string $db;
-    private string $user;
-    private string $pass;
-
-    /**
-     * DatabaseConnector constructor.
-     */
-    public function __construct()
-    {
-        $this->connection = getenv('DB_CONNECTION');
-        $this->host       = getenv('DB_HOST');
-        $this->port       = getenv('DB_PORT');
-        $this->db         = getenv('DB_DATABASE');
-        $this->user       = getenv('DB_USERNAME');
-        $this->pass       = getenv('DB_PASSWORD');
-    }
+    private static ?\PDO $dbConnection = null;
 
     /**
      * Get instance of DB connection
      * @return \PDO Database connection
      */
-    public function getConnection(): \PDO
+    public static function getConnection(): \PDO
     {
-        if (!isset($this->dbConnection)) {
+        if (!isset(self::$dbConnection)) {
+            $connection = getenv('DB_CONNECTION');
+            $host       = getenv('DB_HOST');
+            $port       = getenv('DB_PORT');
+            $db         = getenv('DB_DATABASE');
+            $user       = getenv('DB_USERNAME');
+            $pass       = getenv('DB_PASSWORD');
             try {
-                $this->dbConnection = new \PDO(
-                    "$this->connection:host=$this->host;port=$this->port;charset=utf8mb4;dbname=$this->db",
-                    $this->user,
-                    $this->pass
+                self::$dbConnection = new \PDO(
+                    "$connection:host=$host;port=$port;charset=utf8mb4;dbname=$db",
+                    $user,
+                    $pass
                 );
             } catch (\PDOException $e) {
                 throw $e;
             }
         }
 
-        return $this->dbConnection;
+        return self::$dbConnection;
+    }
+    private function __clone() {
     }
 }

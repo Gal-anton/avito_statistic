@@ -18,5 +18,5 @@ if ($uri[1] !== 'statistics') {
 
 $requestMethod = $_SERVER["REQUEST_METHOD"];
 
-$controller = new StatisticController($dbConnection, $requestMethod);
+$controller = new StatisticController($requestMethod);
 $controller->processRequest();
